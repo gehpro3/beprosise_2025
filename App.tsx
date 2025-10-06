@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { GameState, Card, Player, TraineeAction, Rank } from './types';
 import { createShuffledDeck, shuffleDeck } from './utils/deck';
@@ -44,43 +45,93 @@ const initialPlayer: Omit<Player, 'id'> = {
 
 type PayoutConfig = '3:2' | '6:5' | 'mixed';
 type GamePhase = 'level_select' | 'payout_config' | 'side_bet_config' | 'betting' | 'playing' | 'tutorial';
+const LOCAL_STORAGE_KEY = 'blackjackTrainerSession';
 
 const TutorialIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>);
 
 
 const BlackjackTrainer: React.FC = () => {
     // --- Core Game State ---
-    // `level`: The selected difficulty level, determines which scenarios are generated.
     const [level, setLevel] = useState<number | null>(null);
-    // `payoutConfig`: Defines the Blackjack payout rules (3:2, 6:5, or mixed) for the table.
     const [payoutConfig, setPayoutConfig] = useState<PayoutConfig | null>(null);
-    // `sideBetConfig`: Toggles the availability of side bets for the trainee player.
     const [sideBetConfig, setSideBetConfig] = useState<{ '21+3': boolean; perfectPairs: boolean }>({ '21+3': false, perfectPairs: false });
-    // `gameState`: The main object holding all players, the dealer, the deck, and game prompts. Null until setup is complete.
     const [gameState, setGameState] = useState<GameState | null>(null);
-    // `gamePhase`: Controls the UI flow, from level selection to betting and active play.
     const [gamePhase, setGamePhase] = useState<GamePhase>('level_select');
 
     // --- In-Round State ---
-    // `currentPlayerId`: Tracks which player's turn it is to act.
     const [currentPlayerId, setCurrentPlayerId] = useState<number | string | null>(null);
-    // `isPayoutPhase`: A flag that is true when the dealer's turn is over and outcomes are being displayed.
     const [isPayoutPhase, setIsPayoutPhase] = useState(false);
-    // `evaluatedHands`: A set to track which hands have already received AI feedback to prevent repeat API calls for the same hand.
     const [evaluatedHands, setEvaluatedHands] = useState<Set<number | string>>(new Set());
 
     // --- UI & Feedback State ---
-    // `feedback`: Stores the message and type ('success' or 'error') from the Gemini AI to be displayed to the user.
     const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-    // `stats`: Tracks the number of correct and incorrect strategy decisions made by the trainee.
     const [stats, setStats] = useState({ correct: 0, incorrect: 0 });
-    // `isLoading`: Shows a loading indicator, primarily used while waiting for a response from the Gemini API.
     const [isLoading, setIsLoading] = useState(false);
-    // `showDealerTurnBanner`: Controls the visibility of the "DEALER'S TURN" overlay.
     const [showDealerTurnBanner, setShowDealerTurnBanner] = useState(false);
-    // `showRules`: Toggles the visibility of the game rules modal.
     const [showRules, setShowRules] = useState(false);
     
+    // --- Session Persistence ---
+    // Load state from localStorage on initial render
+    useEffect(() => {
+        try {
+            const savedSession = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedSession) {
+                const { level, payoutConfig, sideBetConfig, gameState, gamePhase, stats, currentPlayerId, isPayoutPhase, evaluatedHands } = JSON.parse(savedSession);
+                if (level !== null) { // Check if there is a valid session
+                    setLevel(level);
+                    setPayoutConfig(payoutConfig);
+                    setSideBetConfig(sideBetConfig);
+                    setGameState(gameState);
+                    setGamePhase(gamePhase);
+                    setStats(stats);
+                    setCurrentPlayerId(currentPlayerId);
+                    setIsPayoutPhase(isPayoutPhase);
+                    setEvaluatedHands(new Set(evaluatedHands || [])); // Restore set
+                    
+                    // Set app badge if session is loaded
+                    if ('setAppBadge' in navigator) {
+                        (navigator as any).setAppBadge().catch((error: any) => {
+                            console.error('Failed to set app badge on load:', error);
+                        });
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load session from localStorage", error);
+        }
+    }, []);
+
+    // Save state to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            // Don't save if we are in the initial setup phase to avoid overwriting a good session with a reset state
+            if (gamePhase !== 'level_select' && level !== null) {
+                const sessionData = {
+                    level,
+                    payoutConfig,
+                    sideBetConfig,
+                    gameState,
+                    gamePhase,
+                    stats,
+                    currentPlayerId,
+                    isPayoutPhase,
+                    evaluatedHands: Array.from(evaluatedHands), // Convert set to array for JSON
+                };
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(sessionData));
+
+                // Set app badge to indicate a session is in progress
+                if ('setAppBadge' in navigator) {
+                    (navigator as any).setAppBadge().catch((error: any) => {
+                        console.error('Failed to set app badge on save:', error);
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Failed to save session to localStorage", error);
+        }
+    }, [level, payoutConfig, sideBetConfig, gameState, gamePhase, stats, currentPlayerId, isPayoutPhase, evaluatedHands]);
+
+
     const updatePlayerAbilities = useCallback((player: Player): Player => {
         const handValue = getHandValue(player.hand);
         const canAffordDouble = true; // Assuming player can always afford for training purposes
@@ -102,7 +153,7 @@ const BlackjackTrainer: React.FC = () => {
             console.error("Deck is empty!");
             return { newDeck: [], newHand: toHand };
         }
-        const card = { ...deck.pop()!, isFaceDown };
+        const card = { ...deck.pop()!, isFaceDown, isNew: true };
         return {
             newDeck: deck,
             newHand: [...toHand, card],
@@ -458,11 +509,21 @@ const BlackjackTrainer: React.FC = () => {
     };
 
     const resetTraining = () => {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        // Clear app badge when session ends
+        if ('clearAppBadge' in navigator) {
+            (navigator as any).clearAppBadge().catch((error: any) => {
+                console.error('Failed to clear app badge:', error);
+            });
+        }
         setLevel(null);
         setPayoutConfig(null);
         setGameState(null);
         setStats({ correct: 0, incorrect: 0 });
         setGamePhase('level_select');
+        setCurrentPlayerId(null);
+        setIsPayoutPhase(false);
+        setFeedback(null);
     };
 
     const handleEndRound = (playerId: string | number) => {
@@ -759,6 +820,34 @@ const BlackjackTrainer: React.FC = () => {
         }, 4000);
     }, [payoutConfig, setupBettingPhase]);
 
+    const handleAnimationsComplete = useCallback(() => {
+        setGameState(prevState => {
+            if (!prevState) return null;
+    
+            // Create a deep copy to avoid direct mutation
+            const newState = JSON.parse(JSON.stringify(prevState));
+    
+            let animationsFound = false;
+            newState.players.forEach((p: Player) => {
+                p.hand.forEach((c: Card) => {
+                    if (c.isNew) {
+                        delete c.isNew;
+                        animationsFound = true;
+                    }
+                });
+            });
+            newState.dealer.hand.forEach((c: Card) => {
+                if (c.isNew) {
+                    delete c.isNew;
+                    animationsFound = true;
+                }
+            });
+    
+            // Only update state if changes were made
+            return animationsFound ? newState : prevState;
+        });
+    }, []);
+
     if (gamePhase === 'level_select') {
         return (
             <div className="text-center">
@@ -935,6 +1024,7 @@ const BlackjackTrainer: React.FC = () => {
                     onBetChange={handleBetChange}
                     onSideBetChange={handleSideBetChange}
                     onTipChange={handleTipChange}
+                    onAnimationsComplete={handleAnimationsComplete}
                     sideBetConfig={sideBetConfig}
                     currentPlayerId={currentPlayerId}
                     isPayoutPhase={isPayoutPhase}
@@ -962,6 +1052,7 @@ const OfflineBanner = () => (
 function App() {
   const [view, setView] = useState<View>('trainer');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -974,6 +1065,50 @@ function App() {
         window.removeEventListener('online', handleOnline);
         window.removeEventListener('offline', handleOffline);
     };
+  }, []);
+  
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    const handleAppInstalled = () => {
+      setInstallPromptEvent(null);
+    };
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (!installPromptEvent) {
+      return;
+    }
+    installPromptEvent.prompt();
+    installPromptEvent.userChoice.then((choiceResult: { outcome: string }) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      setInstallPromptEvent(null);
+    });
+  };
+
+  const validViews: View[] = ['trainer', 'counting', 'payout', 'groove', 'hit_stand', 'virginia_rules', 'dealer_talk', 'audition'];
+  
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewFromUrl = urlParams.get('view') as View;
+    if (viewFromUrl && validViews.includes(viewFromUrl)) {
+      setView(viewFromUrl);
+    }
   }, []);
 
   const renderView = () => {
@@ -1001,7 +1136,12 @@ function App() {
 
   return (
     <div className="bg-slate-900 text-white min-h-screen flex font-sans">
-      <Sidebar currentView={view} setView={setView} />
+      <Sidebar 
+        currentView={view} 
+        setView={setView} 
+        installPromptEvent={installPromptEvent} 
+        onInstallClick={handleInstallClick} 
+      />
       
       <div className="flex-grow flex flex-col p-4 sm:p-6 overflow-y-auto">
         {!isOnline && <OfflineBanner />}

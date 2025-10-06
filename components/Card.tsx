@@ -3,6 +3,7 @@ import { Card as CardType, Suit } from '../types';
 
 interface CardProps {
     card: CardType;
+    animationDelay?: number;
 }
 
 const playSound = (soundId: string) => {
@@ -16,7 +17,7 @@ const playSound = (soundId: string) => {
     }
 };
 
-const Card: React.FC<CardProps> = ({ card }) => {
+const Card: React.FC<CardProps> = ({ card, animationDelay = 0 }) => {
     const [isFaceUp, setIsFaceUp] = useState(!card.isFaceDown);
 
     useEffect(() => {
@@ -33,9 +34,10 @@ const Card: React.FC<CardProps> = ({ card }) => {
     }, [card.isFaceDown]);
     
     const color = card.suit === Suit.HEARTS || card.suit === Suit.DIAMONDS ? 'text-red-500' : 'text-black';
+    const animationStyle = card.isNew ? { animationDelay: `${animationDelay}ms` } : {};
 
     return (
-        <div className={`w-14 h-20 sm:w-16 sm:h-24 card-container ${isFaceUp ? 'is-flipped' : ''}`}>
+        <div className={`w-14 h-20 sm:w-16 sm:h-24 card-container ${isFaceUp ? 'is-flipped' : ''} ${card.isNew ? 'animate-deal-in' : ''}`} style={animationStyle}>
             <div className="card-flipper">
                 {/* Back of the card (visible when not flipped) */}
                 <div className="card-back">

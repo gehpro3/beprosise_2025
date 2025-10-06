@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Player } from '../types';
 import Card from './Card';
 import Chip from './Chip';
@@ -36,6 +36,7 @@ interface PlayerHandProps {
     onSideBetChange: (playerId: number | string, betType: '21+3' | 'perfectPairs') => void;
     onTipChange: (playerId: number | string) => void;
     sideBetConfig: { '21+3': boolean; perfectPairs: boolean };
+    animationBaseDelay?: number;
 }
 
 const PlayerHand: React.FC<PlayerHandProps> = ({ 
@@ -59,11 +60,23 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
     onBetChange,
     onSideBetChange,
     onTipChange,
-    sideBetConfig
+    sideBetConfig,
+    animationBaseDelay = 0
 }) => {
     const handValue = getHandValue(player.hand);
     const betChips = calculateChips(player.bet);
     const [sideBetNotifications, setSideBetNotifications] = useState<{ id: string, message: string }[]>([]);
+    const actionButtonContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        // Automatically focus the first available action button when it's the player's turn.
+        if (isCurrentPlayer && !isPayoutPhase && actionButtonContainerRef.current) {
+            const firstButton = actionButtonContainerRef.current.querySelector<HTMLButtonElement>('button:not([disabled])');
+            if (firstButton) {
+                firstButton.focus();
+            }
+        }
+    }, [isCurrentPlayer, isPayoutPhase]);
 
     useEffect(() => {
         const notifications: { id: string, message: string }[] = [];
@@ -124,8 +137,10 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
                         ) : (
                             <>
                                 <div className="relative">
+                                    <label htmlFor={`bet-${player.id}`} className="sr-only">Bet amount for player {player.id}</label>
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-bold">$</span>
                                     <input
+                                        id={`bet-${player.id}`}
                                         type="text"
                                         inputMode="numeric"
                                         value={player.bet}
@@ -133,7 +148,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
                                         className={`bg-slate-900 border-2 ${player.betError ? 'border-red-500' : 'border-slate-600'} rounded-lg text-white text-center text-xl font-bold w-32 h-12 pl-6 focus:outline-none focus:ring-2 ${player.betError ? 'focus:ring-red-500' : 'focus:ring-slate-400'}`}
                                     />
                                 </div>
-                                {player.betError && <p className="text-red-400 text-xs mt-1">{player.betError}</p>}
+                                {player.betError && <p className="text-red-400 text-xs mt-1" role="alert">{player.betError}</p>}
                             </>
                         )}
                     </div>
@@ -164,11 +179,11 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
 
         if (player.canTakeEvenMoney) {
             return (
-                 <div className="w-full flex gap-2 mt-3 animate-fade-in">
-                    <button onClick={() => onAcceptEvenMoney(player.id)} className={`${buttonClass(true)} bg-emerald-600 hover:bg-emerald-500`}>
+                 <div ref={actionButtonContainerRef} className="w-full flex gap-2 mt-3 animate-fade-in">
+                    <button onClick={() => onAcceptEvenMoney(player.id)} className={`${buttonClass(true)} bg-emerald-600 hover:bg-emerald-500`} aria-label="Accept even money and take a 1:1 payout">
                         <EvenMoneyIcon/> Accept Even Money
                     </button>
-                    <button onClick={() => onDeclineEvenMoney(player.id)} className={`${buttonClass(true)} bg-rose-600 hover:bg-rose-500`}>
+                    <button onClick={() => onDeclineEvenMoney(player.id)} className={`${buttonClass(true)} bg-rose-600 hover:bg-rose-500`} aria-label="Decline even money and play out the hand">
                         Decline
                     </button>
                 </div>
@@ -177,11 +192,11 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
 
         if (isInsuranceOffered) {
             return (
-                 <div className="w-full flex gap-2 mt-3 animate-fade-in">
-                    <button onClick={() => onAcceptInsurance(player.id)} className={`${buttonClass(true)} bg-emerald-600 hover:bg-emerald-500`}>
+                 <div ref={actionButtonContainerRef} className="w-full flex gap-2 mt-3 animate-fade-in">
+                    <button onClick={() => onAcceptInsurance(player.id)} className={`${buttonClass(true)} bg-emerald-600 hover:bg-emerald-500`} aria-label="Accept insurance side bet">
                         <InsuranceIcon/> Accept Insurance
                     </button>
-                    <button onClick={() => onDeclineInsurance(player.id)} className={`${buttonClass(true)} bg-rose-600 hover:bg-rose-500`}>
+                    <button onClick={() => onDeclineInsurance(player.id)} className={`${buttonClass(true)} bg-rose-600 hover:bg-rose-500`} aria-label="Decline insurance side bet">
                         Decline Insurance
                     </button>
                 </div>
@@ -189,21 +204,21 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
         }
 
         return (
-            <div className="w-full flex flex-col items-center gap-2 mt-3 animate-fade-in">
+            <div ref={actionButtonContainerRef} className="w-full flex flex-col items-center gap-2 mt-3 animate-fade-in">
                 <div className="w-full grid grid-cols-3 gap-2">
-                    <button onClick={() => player.canHit && onHit(player.id)} disabled={!player.canHit} className={`${buttonClass(player.canHit)} bg-emerald-600`}>
+                    <button onClick={() => player.canHit && onHit(player.id)} disabled={!player.canHit} className={`${buttonClass(player.canHit)} bg-emerald-600`} aria-label="Hit and take another card">
                         <HitIcon /> Hit
                     </button>
-                    <button onClick={() => player.canStand && onStand(player.id)} disabled={!player.canStand} className={`${buttonClass(player.canStand)} bg-rose-600`}>
+                    <button onClick={() => player.canStand && onStand(player.id)} disabled={!player.canStand} className={`${buttonClass(player.canStand)} bg-rose-600`} aria-label="Stand and end your turn">
                         <StandIcon /> Stand
                     </button>
-                    <button onClick={() => player.canDoubleDown && onDoubleDown(player.id)} disabled={!player.canDoubleDown} className={`${buttonClass(player.canDoubleDown)} bg-sky-600`}>
+                    <button onClick={() => player.canDoubleDown && onDoubleDown(player.id)} disabled={!player.canDoubleDown} className={`${buttonClass(player.canDoubleDown)} bg-sky-600`} aria-label="Double down, double your bet and take one more card">
                         <DoubleIcon /> Double
                     </button>
-                    <button onClick={() => player.canSplit && onSplit(player.id)} disabled={!player.canSplit} className={`${buttonClass(player.canSplit)} bg-amber-600`}>
+                    <button onClick={() => player.canSplit && onSplit(player.id)} disabled={!player.canSplit} className={`${buttonClass(player.canSplit)} bg-amber-600`} aria-label="Split your pair into two separate hands">
                         <SplitIcon /> Split
                     </button>
-                    <button onClick={() => player.canSurrender && onSurrender(player.id)} disabled={!player.canSurrender} className={`${buttonClass(player.canSurrender)} bg-slate-500 col-span-2`}>
+                    <button onClick={() => player.canSurrender && onSurrender(player.id)} disabled={!player.canSurrender} className={`${buttonClass(player.canSurrender)} bg-slate-500 col-span-2`} aria-label="Surrender your hand and forfeit half your bet">
                         <SurrenderIcon /> Surrender
                     </button>
                 </div>
@@ -257,6 +272,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
                     const angle = offsetFromMid * 10;
                     const translateY = Math.abs(offsetFromMid) * 6;
                     const translateX = offsetFromMid * 35;
+                    const animationDelay = card.isNew ? animationBaseDelay + (index * 80) : 0;
                     
                     return (
                          <div
@@ -267,7 +283,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
                                 zIndex: index
                             }}
                         >
-                            <Card card={card} />
+                            <Card card={card} animationDelay={animationDelay} />
                         </div>
                     );
                 })}

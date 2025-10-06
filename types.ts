@@ -25,6 +25,7 @@ export interface Card {
     suit: Suit;
     rank: Rank;
     isFaceDown?: boolean;
+    isNew?: boolean;
 }
 
 export interface Player {

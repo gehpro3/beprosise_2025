@@ -2,8 +2,10 @@
   "name": "Be Pro Sise Blackjack Trainer",
   "short_name": "Be Pro Sise",
   "description": "An interactive AI-powered training tool for aspiring Blackjack dealers.",
-  "start_url": ".",
-  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "any",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "icons": [
@@ -18,6 +20,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Audition Practice",
+      "short_name": "Audition",
+      "description": "Start a timed audition to test all your dealer skills.",
+      "url": "/?view=audition",
+      "icons": [{ "src": "https://cdn.glitch.global/c8227099-198c-4573-a8f8-a1470a6f444c/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Chip Payout Practice",
+      "short_name": "Payouts",
+      "description": "Practice chip payouts for various scenarios.",
+      "url": "/?view=payout",
+      "icons": [{ "src": "https://cdn.glitch.global/c8227099-198c-4573-a8f8-a1470a6f444c/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Card Counting Practice",
+      "short_name": "Counting",
+      "description": "Practice your hand total and running count skills.",
+      "url": "/?view=counting",
+      "icons": [{ "src": "https://cdn.glitch.global/c8227099-198c-4573-a8f8-a1470a6f444c/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }

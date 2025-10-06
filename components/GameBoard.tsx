@@ -1,5 +1,5 @@
-import React from 'react';
-import { GameState, TraineeAction } from '../types';
+import React, { useEffect } from 'react';
+import { GameState } from '../types';
 import Card from './Card';
 import PlayerHand from './PlayerHand';
 import { getHandValue } from '../utils/handCalculator';
@@ -21,6 +21,7 @@ interface GameBoardProps {
     onBetChange: (playerId: number | string, bet: string) => void;
     onSideBetChange: (playerId: number | string, betType: '21+3' | 'perfectPairs') => void;
     onTipChange: (playerId: number | string) => void;
+    onAnimationsComplete: () => void;
     sideBetConfig: { '21+3': boolean; perfectPairs: boolean };
     currentPlayerId: number | string | null;
     isPayoutPhase: boolean;
@@ -44,6 +45,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     onBetChange,
     onSideBetChange,
     onTipChange,
+    onAnimationsComplete,
     sideBetConfig,
     currentPlayerId,
     isPayoutPhase,
@@ -51,6 +53,18 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 }) => {
     const dealerHandValue = getHandValue(gameState.dealer.hand);
     const primaryPlayers = gameState.players.filter(p => typeof p.id === 'number');
+
+    useEffect(() => {
+        const hasNewCards = gameState.players.some(p => p.hand.some(c => c.isNew)) || gameState.dealer.hand.some(c => c.isNew);
+        if (hasNewCards) {
+            const timer = setTimeout(() => {
+                onAnimationsComplete();
+            }, 1000); // Wait for animations to finish
+            return () => clearTimeout(timer);
+        }
+    }, [gameState, onAnimationsComplete]);
+
+    let cardAnimationCounter = 0;
 
     return (
         <div 
@@ -75,6 +89,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                         const angle = offsetFromMid * 6;
                         const translateY = Math.abs(offsetFromMid) * 5;
                         const translateX = offsetFromMid * 30;
+                        const animationDelay = card.isNew ? (cardAnimationCounter++ * 80) : 0;
 
                         return (
                             <div
@@ -85,7 +100,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                                     zIndex: index
                                 }}
                             >
-                                <Card card={card} />
+                                <Card card={card} animationDelay={animationDelay} />
                             </div>
                         );
                     })}
@@ -149,6 +164,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                                             onSideBetChange={onSideBetChange}
                                             onTipChange={onTipChange}
                                             sideBetConfig={sideBetConfig}
+                                            animationBaseDelay={cardAnimationCounter * 80}
                                         />
                                     ))}
                                 </div>
@@ -179,6 +195,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                             onSideBetChange={onSideBetChange}
                             onTipChange={onTipChange}
                             sideBetConfig={sideBetConfig}
+                            animationBaseDelay={cardAnimationCounter * 80}
                         />
                     );
                 })}

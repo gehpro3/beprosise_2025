@@ -5,6 +5,8 @@ type View = 'trainer' | 'counting' | 'payout' | 'groove' | 'hit_stand' | 'virgin
 interface SidebarProps {
     currentView: View;
     setView: (view: View) => void;
+    installPromptEvent: any;
+    onInstallClick: () => void;
 }
 
 const ChallengeIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9a9.75 9.75 0 0 1 9 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 16.5c-1.437 1.437-3.375 2.25-5.375 2.25s-3.938-.813-5.375-2.25M12 18.75v-5.25M12 13.5V6A1.5 1.5 0 0 1 13.5 4.5h3A1.5 1.5 0 0 1 18 6v1.5" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75v1.5" /><path strokeLinecap="round" strokeLinejoin="round" d="M6 6A1.5 1.5 0 0 0 4.5 4.5h-3A1.5 1.5 0 0 0 0 6v1.5" /></svg>);
@@ -15,6 +17,7 @@ const HitStandIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" 
 const VirginiaIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" /></svg>);
 const TalkIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.006 3 11.5c0 2.457 1.483 4.633 3.75 6.075V21l3.75-1.5c.625.063 1.27.094 1.921.094Z" /></svg>);
 const AuditionIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5a6 6 0 0 0-12 0v1.5a6 6 0 0 0 6 6Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 14.25v4.5m0-12.75v-1.5m0 12.75a3 3 0 0 1-3-3v-1.5a3 3 0 0 1 6 0v1.5a3 3 0 0 1-3 3Z" /></svg>);
+const InstallIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>);
 
 const NavItem: React.FC<{
     icon: React.ReactNode;
@@ -45,7 +48,7 @@ const navItems: { view: View; label: string; icon: React.ReactNode }[] = [
     { view: 'virginia_rules', label: 'VA Rules', icon: <VirginiaIcon /> },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, installPromptEvent, onInstallClick }) => {
     return (
         <aside className="w-72 bg-slate-800 p-4 flex-shrink-0 flex flex-col border-r-2 border-slate-700">
             <div className="mb-8 text-center">
@@ -65,6 +68,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
                     />
                 ))}
             </nav>
+            <div className="mt-auto pt-4">
+                {installPromptEvent && (
+                    <button
+                        onClick={onInstallClick}
+                        className="flex items-center w-full px-4 py-3 text-left text-lg rounded-lg transition-colors duration-200 font-medium bg-emerald-600 hover:bg-emerald-500 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-emerald-400 animate-fade-in"
+                        aria-label="Install application"
+                    >
+                        <InstallIcon />
+                        <span className="ml-4">Install App</span>
+                    </button>
+                )}
+            </div>
         </aside>
     );
 };
