@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import ActionFeedback from './ActionFeedback';
 import Chip from './Chip';
@@ -57,7 +58,7 @@ const DIFFICULTY_CONFIG = {
 };
 
 
-const BeProSiseGroove: React.FC = () => {
+const BeProSiseGroove: React.FC<{ isSpeechEnabled: boolean }> = ({ isSpeechEnabled }) => {
     const [sessionState, setSessionState] = useState<SessionState>('idle');
     const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
     const [score, setScore] = useState(0);
@@ -178,6 +179,7 @@ const BeProSiseGroove: React.FC = () => {
     
     const handleTimeout = useCallback(() => {
         if (!difficulty) return;
+        playSound('timeout-sound');
         setFeedback({ message: `Time's up! The correct amount was $${payoutAmount.toFixed(2)}.`, type: 'error' });
         setTimeout(() => {
             if (sessionState === 'running') generateProblem(score, difficulty);
@@ -219,6 +221,7 @@ const BeProSiseGroove: React.FC = () => {
             newScore = score + 1;
             setScore(newScore);
         } else {
+            playSound('timeout-sound');
             setFeedback({ message: `Incorrect. Correct amount is $${payoutAmount.toFixed(2)}.`, type: 'error' });
         }
         
@@ -391,7 +394,7 @@ const BeProSiseGroove: React.FC = () => {
             </div>
             
             <div className="mt-6 text-center h-20 flex flex-col items-center justify-center">
-                <ActionFeedback feedback={feedback} />
+                <ActionFeedback feedback={feedback} isSpeechEnabled={isSpeechEnabled} />
             </div>
         </div>
     );

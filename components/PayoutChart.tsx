@@ -21,12 +21,15 @@ export const PayoutChart: React.FC<{ onClose: () => void; mode: PayoutChartMode 
             <div
                 className="bg-gray-800 rounded-lg shadow-xl max-w-sm w-full max-h-[80vh] overflow-y-auto p-6 relative border-2 border-gray-500"
                 onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="payout-chart-title"
             >
-                <h3 className="text-2xl font-bold text-gray-300 mb-4 text-center">{title}</h3>
+                <h3 id="payout-chart-title" className="text-2xl font-bold text-gray-300 mb-4 text-center">{title}</h3>
                 <button
                     onClick={onClose}
                     className="absolute top-2 right-2 text-gray-400 hover:text-white text-3xl font-bold"
-                    aria-label="Close chart"
+                    aria-label="Close payout chart"
                 >&times;</button>
                 <table className="w-full text-left text-white">
                     <thead>

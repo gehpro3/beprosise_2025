@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import StatsTracker from './StatsTracker';
 import ActionFeedback from './ActionFeedback';
@@ -16,7 +17,7 @@ const HandSignalIcon = () => (
     </svg>
 );
 
-const ChipPayoutPractice: React.FC = () => {
+const ChipPayoutPractice: React.FC<{ isSpeechEnabled: boolean }> = ({ isSpeechEnabled }) => {
     const [payoutMode, setPayoutMode] = useState<PayoutMode>('6:5');
     const [quizMode, setQuizMode] = useState<QuizMode>('6:5');
     const [betAmount, setBetAmount] = useState(0); 
@@ -722,7 +723,7 @@ const ChipPayoutPractice: React.FC = () => {
             </div>
             
             <div className="mt-6 text-center h-20 flex flex-col items-center justify-center">
-                <ActionFeedback feedback={feedback} />
+                <ActionFeedback feedback={feedback} isSpeechEnabled={isSpeechEnabled} />
             </div>
         </div>
     );

@@ -13,13 +13,16 @@ const GameRules: React.FC<GameRulesProps> = ({ onClose }) => {
             <div 
                 className="bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 relative border-2 border-slate-500"
                 onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="rules-title"
             >
                 <button
                     onClick={onClose}
                     className="absolute top-2 right-2 text-slate-400 hover:text-white text-4xl font-bold"
-                    aria-label="Close rules"
+                    aria-label="Close game rules"
                 >&times;</button>
-                <h2 className="text-3xl font-bold text-slate-200 mb-6 text-center border-b-2 border-slate-600 pb-4">
+                <h2 id="rules-title" className="text-3xl font-bold text-slate-200 mb-6 text-center border-b-2 border-slate-600 pb-4">
                     Trainer Game Rules
                 </h2>
                 

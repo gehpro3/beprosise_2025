@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card as CardType, Rank, Suit } from '../types';
 import { createShuffledDeck } from '../utils/deck';
@@ -24,7 +25,7 @@ const findAndRemoveCards = (deck: CardType[], ranks: Rank[]): { foundCards: Card
     return { foundCards, remainingDeck };
 };
 
-const HitStandPractice: React.FC = () => {
+const HitStandPractice: React.FC<{isSpeechEnabled: boolean}> = ({ isSpeechEnabled }) => {
     const [dealerUpCard, setDealerUpCard] = useState<CardType | null>(null);
     const [playerHand, setPlayerHand] = useState<CardType[]>([]);
     const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -166,7 +167,7 @@ const HitStandPractice: React.FC = () => {
 
             <div className="mt-6 text-center h-20 flex flex-col items-center justify-center">
                  {isLoading && !isAnswered && <div className="w-8 h-8 border-4 border-t-transparent border-gray-400 border-solid rounded-full animate-spin"></div>}
-                 <ActionFeedback feedback={feedback} />
+                 <ActionFeedback feedback={feedback} isSpeechEnabled={isSpeechEnabled} />
             </div>
         </div>
     );

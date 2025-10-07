@@ -33,7 +33,7 @@ const getRunningCount = (cards: CardType[]): number => {
     return count;
 };
 
-const CardCountingPractice: React.FC = () => {
+const CardCountingPractice: React.FC<{isSpeechEnabled: boolean}> = ({ isSpeechEnabled }) => {
     const [mode, setMode] = useState<PracticeMode>('hand_total');
     const [hand, setHand] = useState<CardType[]>([]);
     const [revealedCards, setRevealedCards] = useState<CardType[]>([]);
@@ -232,7 +232,7 @@ const CardCountingPractice: React.FC = () => {
             </div>
             
             <div className="mt-6 text-center h-20 flex flex-col items-center justify-center">
-                <ActionFeedback feedback={feedback} />
+                <ActionFeedback feedback={feedback} isSpeechEnabled={isSpeechEnabled} />
             </div>
         </div>
     );

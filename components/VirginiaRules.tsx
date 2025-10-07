@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { getVirginiaRulesAdvice } from '../services/geminiService';
+import { speak } from '../utils/speech';
 
-const VirginiaRules: React.FC = () => {
+const VirginiaRules: React.FC<{isSpeechEnabled: boolean}> = ({ isSpeechEnabled }) => {
     const [question, setQuestion] = useState('');
     const [answer, setAnswer] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +26,7 @@ const VirginiaRules: React.FC = () => {
         try {
             const response = await getVirginiaRulesAdvice(question);
             setAnswer(response);
+            speak(response, isSpeechEnabled);
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred.');
         } finally {
@@ -87,13 +89,13 @@ const VirginiaRules: React.FC = () => {
                     </div>
                 )}
                 {error && (
-                    <div className="bg-red-500/20 border border-red-500 text-red-300 p-4 rounded-lg">
+                    <div role="alert" className="bg-red-500/20 border border-red-500 text-red-300 p-4 rounded-lg">
                         <p className="font-bold">Error:</p>
                         <p>{error}</p>
                     </div>
                 )}
                 {answer && (
-                    <div className="bg-gray-700/50 p-6 rounded-lg border border-gray-600 animate-fade-in">
+                    <div role="status" className="bg-gray-700/50 p-6 rounded-lg border border-gray-600 animate-fade-in">
                         <h3 className="text-2xl font-bold text-gray-300 mb-3">Be Pro Sise's Answer:</h3>
                         <div className="prose prose-invert max-w-none text-gray-300" style={{ whiteSpace: 'pre-wrap' }}>
                             {answer}

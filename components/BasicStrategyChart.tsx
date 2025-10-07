@@ -58,7 +58,6 @@ const ChartSection: React.FC<{ title: string, data: Record<string, string[]> }> 
             return (
                 <tr key={hand} className="border-b border-slate-700">
                     <td className="p-2 font-bold text-center bg-slate-800 text-amber-300">{hand}</td>
-                    {/* Fix: Added an Array.isArray check to ensure `actions.map` is only called on an array, preventing a potential runtime error. */}
                     {Array.isArray(actions) && actions.map((action, index) => (
                         <td key={index} className={`p-2 font-bold text-center ${getCellStyle(action)}`}>
                             {action}
@@ -80,13 +79,16 @@ const BasicStrategyChart: React.FC<BasicStrategyChartProps> = ({ onClose }) => {
             <div 
                 className="bg-slate-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative border-2 border-slate-500"
                 onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="strategy-chart-title"
             >
                  <button
                     onClick={onClose}
                     className="absolute top-2 right-2 text-slate-400 hover:text-white text-4xl font-bold"
-                    aria-label="Close chart"
+                    aria-label="Close basic strategy chart"
                 >&times;</button>
-                <h2 className="text-3xl font-bold text-slate-200 mb-4 text-center">Blackjack Basic Strategy</h2>
+                <h2 id="strategy-chart-title" className="text-3xl font-bold text-slate-200 mb-4 text-center">Blackjack Basic Strategy</h2>
                 <p className="text-center text-slate-400 mb-6">Dealer Hits Soft 17 | Surrender Offered</p>
                 
                 <table className="w-full text-left text-white border-collapse">

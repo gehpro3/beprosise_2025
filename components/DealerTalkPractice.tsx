@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { getDealerTalkCue } from '../services/geminiService';
 import { CueCategory, DealingSubCategory, PayoutSubCategory } from '../types';
+import { speak } from '../utils/speech';
 
-const DealerTalkPractice: React.FC = () => {
+const DealerTalkPractice: React.FC<{isSpeechEnabled: boolean}> = ({ isSpeechEnabled }) => {
     const [category, setCategory] = useState<CueCategory>('dealing');
     const [dealingSubCategory, setDealingSubCategory] = useState<DealingSubCategory>('initial_deal');
     const [payoutSubCategory, setPayoutSubCategory] = useState<PayoutSubCategory>('win');
@@ -47,13 +48,14 @@ const DealerTalkPractice: React.FC = () => {
             const response = await getDealerTalkCue(category, generatedContext);
             setContext(contextString);
             setCue(response);
+            speak(response, isSpeechEnabled);
 
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred.');
         } finally {
             setIsLoading(false);
         }
-    }, [category, dealingSubCategory, payoutSubCategory]);
+    }, [category, dealingSubCategory, payoutSubCategory, isSpeechEnabled]);
 
     const getTabClass = (tabCategory: CueCategory) => {
         const base = "flex-1 text-center py-3 text-lg font-bold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-slate-400";
@@ -122,10 +124,10 @@ const DealerTalkPractice: React.FC = () => {
 
                 <div className="mt-6 w-full min-h-[200px] bg-black/30 rounded-lg p-6 border-2 border-slate-700 flex flex-col justify-center items-center">
                     {isLoading && <div className="w-12 h-12 border-4 border-t-transparent border-slate-400 border-solid rounded-full animate-spin"></div>}
-                    {error && <div className="text-red-400 text-center"><p className="font-bold">Error:</p><p>{error}</p></div>}
+                    {error && <div role="alert" className="text-red-400 text-center"><p className="font-bold">Error:</p><p>{error}</p></div>}
                     
                     {cue && !isLoading && (
-                        <div className="text-center animate-fade-in">
+                        <div aria-live="polite" className="text-center animate-fade-in">
                             <p className="text-sm font-semibold text-slate-400 mb-2">SCENARIO:</p>
                             <p className="text-lg text-slate-300 mb-6 font-medium">{context}</p>
                             <p className="text-sm font-semibold text-slate-400 mb-3">DEALER CUE:</p>

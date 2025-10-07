@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { GameState, Card, Player, TraineeAction, Rank } from './types';
 import { createShuffledDeck, shuffleDeck } from './utils/deck';
@@ -17,6 +16,7 @@ import AuditionPractice from './components/AuditionPractice';
 import Tutorial from './components/Tutorial';
 import GameRules from './components/GameRules';
 import Sidebar from './components/Sidebar';
+import { speak } from './utils/speech';
 
 const initialPlayer: Omit<Player, 'id'> = {
     hand: [],
@@ -47,10 +47,10 @@ type PayoutConfig = '3:2' | '6:5' | 'mixed';
 type GamePhase = 'level_select' | 'payout_config' | 'side_bet_config' | 'betting' | 'playing' | 'tutorial';
 const LOCAL_STORAGE_KEY = 'blackjackTrainerSession';
 
-const TutorialIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>);
+const TutorialIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>);
 
 
-const BlackjackTrainer: React.FC = () => {
+const BlackjackTrainer: React.FC<{ isSpeechEnabled: boolean }> = ({ isSpeechEnabled }) => {
     // --- Core Game State ---
     const [level, setLevel] = useState<number | null>(null);
     const [payoutConfig, setPayoutConfig] = useState<PayoutConfig | null>(null);
@@ -88,7 +88,7 @@ const BlackjackTrainer: React.FC = () => {
                     setIsPayoutPhase(isPayoutPhase);
                     setEvaluatedHands(new Set(evaluatedHands || [])); // Restore set
                     
-                    // Set app badge if session is loaded
+                    // Set app badge if a session is loaded, indicating it's active.
                     if ('setAppBadge' in navigator) {
                         (navigator as any).setAppBadge().catch((error: any) => {
                             console.error('Failed to set app badge on load:', error);
@@ -118,13 +118,6 @@ const BlackjackTrainer: React.FC = () => {
                     evaluatedHands: Array.from(evaluatedHands), // Convert set to array for JSON
                 };
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(sessionData));
-
-                // Set app badge to indicate a session is in progress
-                if ('setAppBadge' in navigator) {
-                    (navigator as any).setAppBadge().catch((error: any) => {
-                        console.error('Failed to set app badge on save:', error);
-                    });
-                }
             }
         } catch (error) {
             console.error("Failed to save session to localStorage", error);
@@ -429,6 +422,12 @@ const BlackjackTrainer: React.FC = () => {
     const handleLevelSelect = (selectedLevel: number) => {
         setLevel(selectedLevel);
         setGamePhase('payout_config');
+        // Set app badge to indicate a new session has started.
+        if ('setAppBadge' in navigator) {
+            (navigator as any).setAppBadge().catch((error: any) => {
+                console.error('Failed to set app badge on level select:', error);
+            });
+        }
     };
 
     const handleStartGame = (config: PayoutConfig) => {
@@ -510,7 +509,7 @@ const BlackjackTrainer: React.FC = () => {
 
     const resetTraining = () => {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
-        // Clear app badge when session ends
+        // Clear app badge when the session is ended.
         if ('clearAppBadge' in navigator) {
             (navigator as any).clearAppBadge().catch((error: any) => {
                 console.error('Failed to clear app badge:', error);
@@ -524,6 +523,7 @@ const BlackjackTrainer: React.FC = () => {
         setCurrentPlayerId(null);
         setIsPayoutPhase(false);
         setFeedback(null);
+        setEvaluatedHands(new Set());
     };
 
     const handleEndRound = (playerId: string | number) => {
@@ -854,44 +854,44 @@ const BlackjackTrainer: React.FC = () => {
                 <h2 className="text-3xl font-bold mb-2 text-slate-100">Step 1: Select Challenge Level</h2>
                 <p className="text-slate-400 mb-8">Choose your training focus. Each level introduces new strategic decisions.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div onClick={() => setGamePhase('tutorial')} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-sky-400 col-span-1 sm:col-span-2 lg:col-span-3">
+                    <button type="button" onClick={() => setGamePhase('tutorial')} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-sky-400 col-span-1 sm:col-span-2 lg:col-span-3">
                         <div className="flex justify-center items-center gap-3">
                             <TutorialIcon />
                             <h3 className="text-2xl font-bold text-sky-300">New? Start Here!</h3>
                         </div>
                         <p className="text-slate-400 mt-2 text-sm">Take a guided tour of the trainer and learn the basics of Blackjack.</p>
-                    </div>
-                    <div onClick={() => handleLevelSelect(1)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
+                    </button>
+                    <button type="button" onClick={() => handleLevelSelect(1)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
                         <h3 className="text-2xl font-bold text-amber-300">Level 1: Fundamentals</h3>
                         <p className="text-slate-400 mt-2 text-sm">Master the core decisions of Hit and Stand.</p>
-                    </div>
-                    <div onClick={() => handleLevelSelect(2)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
+                    </button>
+                    <button type="button" onClick={() => handleLevelSelect(2)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
                         <h3 className="text-2xl font-bold text-amber-300">Level 2: Doubling Down</h3>
                         <p className="text-slate-400 mt-2 text-sm">Learn the optimal moments to Double Down for maximum value.</p>
-                    </div>
-                    <div onClick={() => handleLevelSelect(3)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
+                    </button>
+                    <button type="button" onClick={() => handleLevelSelect(3)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
                         <h3 className="text-2xl font-bold text-amber-300">Level 3: Splitting Pairs</h3>
                         <p className="text-slate-400 mt-2 text-sm">Understand the strategic advantage of Splitting pairs.</p>
-                    </div>
-                    <div onClick={() => handleLevelSelect(4)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
+                    </button>
+                    <button type="button" onClick={() => handleLevelSelect(4)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
                         <h3 className="text-2xl font-bold text-amber-300">Level 4: Insurance & Even Money</h3>
                         <p className="text-slate-400 mt-2 text-sm">Practice making the correct call when the dealer shows an Ace.</p>
-                    </div>
-                    <div onClick={() => handleLevelSelect(5)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
+                    </button>
+                    <button type="button" onClick={() => handleLevelSelect(5)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
                         <h3 className="text-2xl font-bold text-amber-300">Level 5: Full Sim</h3>
                         <p className="text-slate-400 mt-2 text-sm">A full simulation handling any scenario: splits, doubles, and insurance.</p>
-                    </div>
-                    <div onClick={() => handleLevelSelect(6)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
+                    </button>
+                    <button type="button" onClick={() => handleLevelSelect(6)} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
                         <h3 className="text-2xl font-bold text-amber-300">Level 6: Surrender</h3>
                         <p className="text-slate-400 mt-2 text-sm">Know when to fold 'em. Practice the strategic art of Surrender.</p>
-                    </div>
+                    </button>
                 </div>
             </div>
         );
     }
 
     if (gamePhase === 'tutorial') {
-        return <Tutorial onExit={() => setGamePhase('level_select')} />;
+        return <Tutorial onExit={() => setGamePhase('level_select')} isSpeechEnabled={isSpeechEnabled} />;
     }
     
     if (gamePhase === 'payout_config') {
@@ -900,18 +900,18 @@ const BlackjackTrainer: React.FC = () => {
                 <h2 className="text-3xl font-bold mb-2 text-slate-100">Step 2: Configure Payout Rules</h2>
                 <p className="text-slate-400 mb-8">Set the Blackjack payout rules for the table.</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div onClick={() => handleStartGame('3:2')} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
+                    <button type="button" onClick={() => handleStartGame('3:2')} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
                         <h3 className="text-2xl font-bold text-amber-300">All 3:2</h3>
                         <p className="text-slate-400 mt-2 text-sm">All players receive the standard 3:2 payout for Blackjack.</p>
-                    </div>
-                    <div onClick={() => handleStartGame('6:5')} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
+                    </button>
+                    <button type="button" onClick={() => handleStartGame('6:5')} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
                         <h3 className="text-2xl font-bold text-amber-300">All 6:5</h3>
                         <p className="text-slate-400 mt-2 text-sm">All players receive a 6:5 payout for Blackjack.</p>
-                    </div>
-                    <div onClick={() => handleStartGame('mixed')} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
+                    </button>
+                    <button type="button" onClick={() => handleStartGame('mixed')} className="bg-slate-700 rounded-lg p-6 text-center hover:bg-slate-600 transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 border-transparent hover:border-amber-400">
                         <h3 className="text-2xl font-bold text-amber-300">Mixed Table</h3>
                         <p className="text-slate-400 mt-2 text-sm">A random mix of 3:2 and 6:5 payouts at the table.</p>
-                    </div>
+                    </button>
                 </div>
                 <button onClick={() => setGamePhase('level_select')} className="mt-8 px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold">Back to Level Select</button>
             </div>
@@ -926,9 +926,11 @@ const BlackjackTrainer: React.FC = () => {
             isActive: boolean;
             onToggle: () => void;
         }> = ({ title, description, payouts, isActive, onToggle }) => (
-            <div 
+            <button
+                type="button" 
                 onClick={onToggle}
-                className={`rounded-lg p-6 text-center transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 ${isActive ? 'bg-slate-600 border-amber-400' : 'bg-slate-700 border-transparent hover:border-slate-500'}`}
+                className={`w-full rounded-lg p-6 text-center transition-all transform hover:-translate-y-1 cursor-pointer shadow-lg border-2 ${isActive ? 'bg-slate-600 border-amber-400' : 'bg-slate-700 border-transparent hover:border-slate-500'}`}
+                aria-pressed={isActive}
             >
                 <h3 className={`text-2xl font-bold ${isActive ? 'text-amber-300' : 'text-slate-200'}`}>{title}</h3>
                 <p className="text-slate-400 mt-2 text-sm h-12">{description}</p>
@@ -936,7 +938,7 @@ const BlackjackTrainer: React.FC = () => {
                     <p className="font-bold mb-1">PAYS ON:</p>
                     {payouts.map(p => <p key={p}>{p}</p>)}
                 </div>
-            </div>
+            </button>
         );
 
         return (
@@ -992,7 +994,7 @@ const BlackjackTrainer: React.FC = () => {
                     <button 
                         onClick={resetTraining} 
                         className="px-4 py-2 bg-rose-700 hover:bg-rose-600 rounded-lg font-semibold"
-                        aria-label="End Session"
+                        aria-label="End Session and reset training"
                     >
                         End Session
                     </button>
@@ -1034,7 +1036,7 @@ const BlackjackTrainer: React.FC = () => {
 
             <div className="mt-6 text-center h-20 flex flex-col items-center justify-center">
                  {isLoading && !feedback && <div className="w-8 h-8 border-4 border-t-transparent border-slate-400 border-solid rounded-full animate-spin"></div>}
-                 <ActionFeedback feedback={feedback} />
+                 <ActionFeedback feedback={feedback} isSpeechEnabled={isSpeechEnabled} />
             </div>
         </div>
     );
@@ -1053,6 +1055,10 @@ function App() {
   const [view, setView] = useState<View>('trainer');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
+  const [isSpeechEnabled, setIsSpeechEnabled] = useState(() => {
+    // Default to true if the setting doesn't exist
+    return localStorage.getItem('isSpeechEnabled') !== 'false';
+  });
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -1100,6 +1106,16 @@ function App() {
       setInstallPromptEvent(null);
     });
   };
+  
+  const handleToggleSpeech = () => {
+    setIsSpeechEnabled(prev => {
+      const newState = !prev;
+      localStorage.setItem('isSpeechEnabled', String(newState));
+      // Announce the change
+      speak(`Instructor voice ${newState ? 'enabled' : 'disabled'}.`, newState);
+      return newState;
+    });
+  };
 
   const validViews: View[] = ['trainer', 'counting', 'payout', 'groove', 'hit_stand', 'virginia_rules', 'dealer_talk', 'audition'];
   
@@ -1114,23 +1130,23 @@ function App() {
   const renderView = () => {
     switch (view) {
       case 'trainer':
-        return <BlackjackTrainer />;
+        return <BlackjackTrainer isSpeechEnabled={isSpeechEnabled} />;
       case 'counting':
-        return <CardCountingPractice />;
+        return <CardCountingPractice isSpeechEnabled={isSpeechEnabled} />;
       case 'hit_stand':
-        return <HitStandPractice />;
+        return <HitStandPractice isSpeechEnabled={isSpeechEnabled} />;
       case 'payout':
-        return <ChipPayoutPractice />;
+        return <ChipPayoutPractice isSpeechEnabled={isSpeechEnabled} />;
       case 'groove':
-        return <BeProSiseGroove />;
+        return <BeProSiseGroove isSpeechEnabled={isSpeechEnabled} />;
       case 'virginia_rules':
-        return <VirginiaRules />;
+        return <VirginiaRules isSpeechEnabled={isSpeechEnabled} />;
       case 'dealer_talk':
-        return <DealerTalkPractice />;
+        return <DealerTalkPractice isSpeechEnabled={isSpeechEnabled} />;
       case 'audition':
-        return <AuditionPractice />;
+        return <AuditionPractice isSpeechEnabled={isSpeechEnabled} />;
       default:
-        return <BlackjackTrainer />;
+        return <BlackjackTrainer isSpeechEnabled={isSpeechEnabled} />;
     }
   };
 
@@ -1140,7 +1156,9 @@ function App() {
         currentView={view} 
         setView={setView} 
         installPromptEvent={installPromptEvent} 
-        onInstallClick={handleInstallClick} 
+        onInstallClick={handleInstallClick}
+        isSpeechEnabled={isSpeechEnabled}
+        onToggleSpeech={handleToggleSpeech}
       />
       
       <div className="flex-grow flex flex-col p-4 sm:p-6 overflow-y-auto">

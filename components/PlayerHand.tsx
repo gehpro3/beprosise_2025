@@ -5,13 +5,13 @@ import Chip from './Chip';
 import { getHandValue } from '../utils/handCalculator';
 import { calculateChips } from '../utils/chipCalculator';
 
-const HitIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
-const StandIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.042L15 21a2.25 2.25 0 0 0-2.25-2.25h-1.5a2.25 2.25 0 0 0-2.25 2.25c0 .355.116.684.31.958L10.5 21.042m4.542-.001a4.5 4.5 0 1 0-9.085 0M9 3.75a3 3 0 0 0-3 3v1.5a3 3 0 0 0 3 3v-6Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 3.75a3 3 0 0 0-3 3v1.5a3 3 0 0 0 3 3v-6Z" /></svg>;
-const DoubleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-3h6" /></svg>;
-const SplitIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 19.5v-15m0 0a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 12 19.5m0-15a2.25 2.25 0 0 1 2.25 2.25v10.5A2.25 2.25 0 0 1 12 19.5m-9-3.75h.008v.008H3v-.008Zm18 0h.008v.008h-.008v-.008Z" /></svg>;
-const SurrenderIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9 9.75h.008v.008H9V9.75Zm4.5 0h.008v.008H13.5V9.75Z" /></svg>;
-const InsuranceIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286Z" /></svg>;
-const EvenMoneyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-3h6" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" /></svg>;
+const HitIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
+const StandIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.042L15 21a2.25 2.25 0 0 0-2.25-2.25h-1.5a2.25 2.25 0 0 0-2.25 2.25c0 .355.116.684.31.958L10.5 21.042m4.542-.001a4.5 4.5 0 1 0-9.085 0M9 3.75a3 3 0 0 0-3 3v1.5a3 3 0 0 0 3 3v-6Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 3.75a3 3 0 0 0-3 3v1.5a3 3 0 0 0 3 3v-6Z" /></svg>;
+const DoubleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-3h6" /></svg>;
+const SplitIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 19.5v-15m0 0a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 12 19.5m0-15a2.25 2.25 0 0 1 2.25 2.25v10.5A2.25 2.25 0 0 1 12 19.5m-9-3.75h.008v.008H3v-.008Zm18 0h.008v.008h-.008v-.008Z" /></svg>;
+const SurrenderIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9 9.75h.008v.008H9V9.75Zm4.5 0h.008v.008H13.5V9.75Z" /></svg>;
+const InsuranceIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286Z" /></svg>;
+const EvenMoneyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-3h6" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" /></svg>;
 
 
 interface PlayerHandProps {
@@ -109,24 +109,27 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
         return (
             <div className="flex flex-col items-center gap-2">
                 {!player.isAuto && (
-                    <div 
+                    <button 
+                        type="button"
                         className="w-16 h-16 border-2 border-dashed border-yellow-400 rounded-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-yellow-700/30 mb-2"
                         onClick={() => onTipChange(player.id)}
-                        title="Tip Dealer ($1)"
+                        aria-label="Tip Dealer ($1)"
                     >
                         <span className="text-xs font-bold text-yellow-300">TIP</span>
                         {player.tip && player.tip > 0 && <Chip value={player.tip} />}
-                    </div>
+                    </button>
                 )}
                 <div className="flex items-center gap-2">
                     {sideBetConfig['21+3'] && !player.isAuto && (
-                        <div 
+                        <button
+                            type="button"
                             className="w-20 h-20 border-2 border-dashed border-slate-400 rounded-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-700/50"
                             onClick={() => onSideBetChange(player.id, '21+3')}
+                            aria-label="Place $5 21+3 side bet"
                         >
                             <span className="text-xs font-bold text-slate-300">21+3</span>
                             {player.sideBets?.['21+3'] && <Chip value={player.sideBets['21+3']} />}
-                        </div>
+                        </button>
                     )}
 
                     <div className="flex flex-col items-center">
@@ -138,7 +141,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
                             <>
                                 <div className="relative">
                                     <label htmlFor={`bet-${player.id}`} className="sr-only">Bet amount for player {player.id}</label>
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-bold">$</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-bold" aria-hidden="true">$</span>
                                     <input
                                         id={`bet-${player.id}`}
                                         type="text"
@@ -146,6 +149,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
                                         value={player.bet}
                                         onChange={(e) => onBetChange(player.id, e.target.value)}
                                         className={`bg-slate-900 border-2 ${player.betError ? 'border-red-500' : 'border-slate-600'} rounded-lg text-white text-center text-xl font-bold w-32 h-12 pl-6 focus:outline-none focus:ring-2 ${player.betError ? 'focus:ring-red-500' : 'focus:ring-slate-400'}`}
+                                        aria-label={`Current bet for player ${player.id}`}
                                     />
                                 </div>
                                 {player.betError && <p className="text-red-400 text-xs mt-1" role="alert">{player.betError}</p>}
@@ -154,17 +158,19 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
                     </div>
 
                      {sideBetConfig.perfectPairs && !player.isAuto && (
-                        <div 
+                        <button
+                            type="button"
                             className="w-20 h-20 border-2 border-dashed border-slate-400 rounded-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-700/50"
                             onClick={() => onSideBetChange(player.id, 'perfectPairs')}
+                            aria-label="Place $5 Perfect Pairs side bet"
                         >
                             <span className="text-xs font-bold text-slate-300">Perfect Pairs</span>
                             {player.sideBets?.perfectPairs && <Chip value={player.sideBets.perfectPairs} />}
-                        </div>
+                        </button>
                     )}
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-400 bg-slate-900/50 px-2 py-1 rounded">BJ PAYS {player.payoutRule}</span>
+                    <span className="text-xs font-semibold text-slate-300 bg-slate-900/50 px-2 py-1 rounded">BJ PAYS {player.payoutRule}</span>
                 </div>
             </div>
         );
@@ -289,7 +295,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
                 })}
                 
                 {isPayoutPhase && outcomeStyle && (
-                    <div className={`absolute inset-0 bg-black/70 flex items-center justify-center rounded-xl z-20 animate-fade-in`}>
+                    <div role="status" className={`absolute inset-0 bg-black/70 flex items-center justify-center rounded-xl z-20 animate-fade-in`}>
                         <div className={`text-2xl font-bold px-4 py-2 rounded-lg ${outcomeStyle.color}`}>
                            {outcomeStyle.text}
                         </div>
@@ -299,6 +305,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
                     const isWin = note.message.includes('WIN');
                     return (
                         <div key={note.id} 
+                            role="status"
                             className={`absolute -bottom-2 transform transition-all duration-500 ease-out z-30 animate-fade-in
                                 px-3 py-1 rounded-full text-xs font-bold shadow-lg border-2
                                 ${isWin ? 'bg-emerald-500 border-emerald-300 text-white' : 'bg-rose-600 border-rose-400 text-white'}`}

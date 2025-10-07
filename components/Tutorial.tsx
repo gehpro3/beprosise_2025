@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { speak } from '../utils/speech';
 
 interface TutorialProps {
     onExit: () => void;
+    isSpeechEnabled: boolean;
 }
 
 const tutorialSteps = [
     {
         title: "Welcome to Ginia's Blackjack Trainer!",
-        content: "This quick tutorial will walk you through the basics of Blackjack and how to use this trainer to sharpen your skills. Let's get started!"
+        content: "This quick tutorial will walk you through the basics of Blackjack and how to use this trainer to sharpen your skills. Let's get started!",
+        speech: "Welcome to Ginia's Blackjack Trainer! This quick tutorial will walk you through the basics of Blackjack and how to use this trainer to sharpen your skills. Let's get started!",
     },
     {
         title: "The Goal of Blackjack",
-        content: "Your goal is simple: get a hand value closer to 21 than the dealer's, without going over 21. Going over 21 is called a 'Bust', and it's an automatic loss."
+        content: "Your goal is simple: get a hand value closer to 21 than the dealer's, without going over 21. Going over 21 is called a 'Bust', and it's an automatic loss.",
+        speech: "The Goal of Blackjack. Your goal is simple: get a hand value closer to 21 than the dealer's, without going over 21. Going over 21 is called a 'Bust', and it's an automatic loss.",
     },
     {
         title: "Card Values",
@@ -21,11 +25,13 @@ const tutorialSteps = [
                 <li><strong>Jack, Queen, and King</strong> are each worth 10.</li>
                 <li><strong>Aces</strong> are special: they can be worth 1 or 11, whichever value gives you the best hand.</li>
             </ul>
-        )
+        ),
+        speech: "Card Values. Cards 2 through 10 are worth their face value. Jack, Queen, and King are each worth 10. Aces are special: they can be worth 1 or 11, whichever value gives you the best hand.",
     },
     {
         title: "Understanding the Trainer",
-        content: "The main screen shows the dealer's hand at the top and your hand(s) at the bottom. Your bet, hand total, and available actions are clearly displayed for each of your hands."
+        content: "The main screen shows the dealer's hand at the top and your hand(s) at the bottom. Your bet, hand total, and available actions are clearly displayed for each of your hands.",
+        speech: "Understanding the Trainer. The main screen shows the dealer's hand at the top and your hand(s) at the bottom. Your bet, hand total, and available actions are clearly displayed for each of your hands.",
     },
     {
         title: "Your Main Actions: Hit & Stand",
@@ -34,28 +40,40 @@ const tutorialSteps = [
                 <p><strong className="text-green-400">Hit:</strong> Take another card. You can hit as many times as you want, but be careful not to bust!</p>
                 <p><strong className="text-red-400">Stand:</strong> Keep your current hand and end your turn. This is the right move when you have a strong hand or think hitting is too risky.</p>
             </div>
-        )
+        ),
+        speech: "Your Main Actions: Hit and Stand. Hit means to take another card. You can hit as many times as you want, but be careful not to bust! Stand means to keep your current hand and end your turn. This is the right move when you have a strong hand or think hitting is too risky.",
     },
     {
         title: "Meet Ginia, Your AI Mentor",
-        content: "This is a training tool! After you choose an action, Ginia will give you instant feedback. She'll tell you if your move was correct according to perfect Basic Strategy and explain why. This is the key to learning fast."
+        content: "This is a training tool! After you choose an action, Ginia will give you instant feedback. She'll tell you if your move was correct according to perfect Basic Strategy and explain why. This is the key to learning fast.",
+        speech: "Meet Ginia, Your AI Mentor. This is a training tool! After you choose an action, Ginia will give you instant feedback. She'll tell you if your move was correct according to perfect Basic Strategy and explain why. This is the key to learning fast.",
     },
     {
         title: "Advanced Moves & Levels",
-        content: "As you progress through the Challenge Levels, you'll practice more advanced situations like Doubling Down, Splitting Pairs, and taking Insurance. Each level is designed to focus on a specific skill."
+        content: "As you progress through the Challenge Levels, you'll practice more advanced situations like Doubling Down, Splitting Pairs, and taking Insurance. Each level is designed to focus on a specific skill.",
+        speech: "Advanced Moves and Levels. As you progress through the Challenge Levels, you'll practice more advanced situations like Doubling Down, Splitting Pairs, and taking Insurance. Each level is designed to focus on a specific skill.",
     },
     {
         title: "Other Practice Modes",
-        content: "Use the tabs at the top of the screen to access other specialized drills. You can practice Card Counting, Chip Payouts, and even learn what to say at the table with the 'Dealer Talk' mode."
+        content: "Use the tabs at the top of the screen to access other specialized drills. You can practice Card Counting, Chip Payouts, and even learn what to say at the table with the 'Dealer Talk' mode.",
+        speech: "Other Practice Modes. Use the tabs at the top of the screen to access other specialized drills. You can practice Card Counting, Chip Payouts, and even learn what to say at the table with the 'Dealer Talk' mode.",
     },
     {
         title: "You're Ready to Train!",
-        content: "You've got the basics! Click 'Finish' to exit this tutorial and select Level 1 to start your first challenge. Good luck!"
+        content: "You've got the basics! Click 'Finish' to exit this tutorial and select Level 1 to start your first challenge. Good luck!",
+        speech: "You're Ready to Train! You've got the basics! Click 'Finish' to exit this tutorial and select Level 1 to start your first challenge. Good luck!",
     }
 ];
 
-const Tutorial: React.FC<TutorialProps> = ({ onExit }) => {
+const Tutorial: React.FC<TutorialProps> = ({ onExit, isSpeechEnabled }) => {
     const [currentStep, setCurrentStep] = useState(0);
+
+    useEffect(() => {
+        const step = tutorialSteps[currentStep];
+        if (step.speech) {
+            speak(step.speech, isSpeechEnabled);
+        }
+    }, [currentStep, isSpeechEnabled]);
 
     const handleNext = () => {
         if (currentStep < tutorialSteps.length - 1) {
@@ -70,14 +88,18 @@ const Tutorial: React.FC<TutorialProps> = ({ onExit }) => {
     };
 
     const step = tutorialSteps[currentStep];
-    // Fix: Capture `step.content` in a `const` to ensure TypeScript correctly narrows its type within the closure for `ContentComponent`.
     const content = step.content;
     const ContentComponent = typeof content === 'function' ? content : () => <p>{content}</p>;
 
     return (
-        <div className="w-full max-w-2xl mx-auto bg-gray-800 p-8 rounded-lg shadow-2xl border-2 border-gray-600 animate-fade-in">
+        <div 
+            className="w-full max-w-2xl mx-auto bg-gray-800 p-8 rounded-lg shadow-2xl border-2 border-gray-600 animate-fade-in"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tutorial-title"
+        >
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-3xl font-bold text-gray-200">{step.title}</h2>
+                <h2 id="tutorial-title" className="text-3xl font-bold text-gray-200">{step.title}</h2>
                 <span className="text-gray-400 font-semibold">
                     Step {currentStep + 1} / {tutorialSteps.length}
                 </span>
@@ -107,6 +129,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onExit }) => {
                     <button 
                         onClick={onExit}
                         className="px-8 py-3 bg-green-600 hover:bg-green-500 rounded-lg font-bold text-xl transition-colors shadow-lg"
+                        aria-label="Finish tutorial"
                     >
                         Finish
                     </button>
